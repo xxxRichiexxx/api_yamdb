@@ -6,7 +6,7 @@ from .permissions import IsAdminOrReadOnly
 from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
 
-class CatigoriesViewSet(viewsets.ModelViewSet):
+class CategoriesViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
