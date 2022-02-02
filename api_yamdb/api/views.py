@@ -6,7 +6,8 @@ from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from.serializers import GetConfirmationCodeSerializer, GetTokenSerializer, UserSerializer
+from .serializers import GetConfirmationCodeSerializer, GetTokenSerializer, UserSerializer
+from .permissions import AdminUserModelPermission
 
 
 User = get_user_model()
@@ -55,6 +56,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     lookup_url_kwarg = 'username'
     lookup_field = 'username'
+    permission_classes = (AdminUserModelPermission,)
 
     def get_object(self):
         if self.kwargs['username'] == 'me':
