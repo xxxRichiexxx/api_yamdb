@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 
-from yamdb.validators import validate_user
+from reviews.validators import validate_user
 
 User = get_user_model()
 

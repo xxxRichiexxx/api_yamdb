@@ -53,3 +53,14 @@ class GetTokenApiView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    lookup_url_kwarg = 'username'
+    lookup_field = 'username'
+
+    def get_object(self):
+        if self.kwargs['username'] == 'me':
+            obj = self.request.user
+            self.check_object_permissions(self.request, obj)
+            return obj
+        return super().get_object()
+
+
