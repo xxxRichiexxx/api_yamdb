@@ -1,33 +1,26 @@
-from rest_framework import viewsets
-from rest_framework import mixins
+from rest_framework import viewsets, mixins, status, permissions
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import permissions
 
 from.serializers import GetConfirmationCodeSerializer, GetTokenSerializer, UserSerializer
 
 
 User = get_user_model()
 
-class GetConfirmationCodeView(APIView):
-    http_method_names = ['post', ]
+
+class GetConfirmationCodeViewSet(mixins.CreateModelMixin,
+                                 viewsets.GenericViewSet):
+
+    serializer_class = GetConfirmationCodeSerializer
     permission_classes = (permissions.AllowAny,)
 
-    def post(self, request):
-        serializer = GetConfirmationCodeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        #генерация пароля
-        user, created = User.objects.get_or_create(**serializer.validated_data)
-        # user = User.objects.create_user(**serializer.validated_data)
-        password = User.objects.make_random_password()
-        user.set_password(password)
-        user.save()
+    def perform_create(self, serializer):
         email = serializer.validated_data['email']
+        password = User.objects.make_random_password()
         # отправка письма
         send_mail(
             'Subject here',
@@ -36,8 +29,7 @@ class GetConfirmationCodeView(APIView):
             [email],
             fail_silently=False,
         )
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
-
+        serializer.save(password=password)
 
 
 class GetTokenApiView(APIView):
