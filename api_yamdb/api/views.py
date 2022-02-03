@@ -5,7 +5,9 @@ from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Title
+from reviews.models import (Category,
+                            Genre,
+                            Title)
 
 from .permissions import AdminUserModelPermission, IsAdminOrSuperUserOrReadOnly
 from .serializers import (
@@ -13,19 +15,21 @@ from .serializers import (
     GenreSerializer,
     GetConfirmationCodeSerializer,
     GetTokenSerializer,
-    TitleSerializer, UserSerializer
+    TitleSerializer,
+    UserSerializer
 )
 
 User = get_user_model()
 
 
-class GetConfirmationCodeViewSet(mixins.CreateModelMixin,
-                                 viewsets.GenericViewSet):
+class GetConfirmationCodeView(APIView):
 
-    serializer_class = GetConfirmationCodeSerializer
+    http_method_names = ['post', ]
     permission_classes = (permissions.AllowAny,)
 
-    def perform_create(self, serializer):
+    def post(self, request):
+        serializer = GetConfirmationCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
         password = User.objects.make_random_password()
         # отправка письма
@@ -37,6 +41,7 @@ class GetConfirmationCodeViewSet(mixins.CreateModelMixin,
             fail_silently=False,
         )
         serializer.save(password=password)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class GetTokenApiView(APIView):
@@ -45,16 +50,16 @@ class GetTokenApiView(APIView):
 
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data['username']
-        password = serializer.validated_data['password']
+        serializer.is_valid()
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
             access_token = RefreshToken.for_user(user).access_token
             data = {"token": str(access_token)}
             return Response(data, status=status.HTTP_201_CREATED)
-        errors = {"error": "login or password is incorrect"}
-        return Response(errors, status=status.HTTP_404_NOT_FOUND)
+        errors = {"error": "password is incorrect"}
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):

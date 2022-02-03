@@ -30,6 +30,8 @@ class CustomUser(AbstractUser):
         max_length=30,
         verbose_name='Роль',
         choices=ROLE_CHOICES,
+        blank=True,
+        default='user'
     )
 
 # extra_kwargs = {'email': {'required': True}}
@@ -55,6 +57,7 @@ class Genre(models.Model):
 
     def __str__(self):
         return self.slug
+    pass
 
 
 class Title(models.Model):
@@ -94,3 +97,4 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.genre} {self.title}'
+    pass

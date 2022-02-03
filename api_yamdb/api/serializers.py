@@ -2,10 +2,13 @@ import datetime as dt
 
 from rest_framework import serializers
 from django.db.models import Q
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
+from django.shortcuts import get_object_or_404
 
 from reviews.validators import validate_user
-from reviews.models import Category, Genre, Title
+from reviews.models import (Category,
+                            Genre,
+                            Title)
 
 User = get_user_model()
 
@@ -40,13 +43,13 @@ class GetConfirmationCodeSerializer(serializers.ModelSerializer):
         return user
 
 
-class GetTokenSerializer(serializers.ModelSerializer):
-    confirmation_code = serializers.CharField(source='password')
+class GetTokenSerializer(serializers.Serializer):
     username = serializers.CharField()
+    confirmation_code = serializers.CharField(source='password')
 
-    class Meta:
-        model = User
-        fields = ['username', 'confirmation_code', ]
+    def validate_username(self, value):
+        get_object_or_404(User, username=value)
+        return value
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -68,8 +71,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    # genre = GenreSerializer(many=True)
-    # category = CategorySerializer()
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
     genre = serializers.MultipleChoiceField(choices=Genre.objects.all().values_list('id', 'slug'))
     category = serializers.ChoiceField(
         choices=Category.objects.all().values_list('id', 'slug'))
