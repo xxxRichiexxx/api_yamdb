@@ -3,7 +3,12 @@ from rest_framework import filters, viewsets
 from reviews.models import Category, Genre, Title
 
 from .permissions import IsAdminOrReadOnly
-from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
+from .serializers import (
+    CategorySerializer,
+    GenreSerializer,
+    TitleGetSerializer,
+    TitlePostSerializer
+)
 
 
 class CategoriesViewSet(viewsets.ModelViewSet):
@@ -24,7 +29,12 @@ class GenresViewSet(viewsets.ModelViewSet):
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    serializer_class = TitleGetSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+
+    def get_serializer_class(self):
+        if self.method == 'POST':
+            return TitlePostSerializer
+        return TitleGetSerializer
