@@ -24,7 +24,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField()
+    name = models.TextField()
     year = models.IntegerField()
     description = models.TextField(blank=True)
     genre = models.ManyToManyField(
@@ -33,6 +33,8 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
         related_name='titles')
 
     class Meta:
@@ -52,7 +54,8 @@ class GenreTitle(models.Model):
     genre = models.ForeignKey(
         Genre,
         on_delete=models.SET_NULL,
-        blank=True)
+        blank=True,
+        null=True)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
     def __str__(self):
