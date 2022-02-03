@@ -1,14 +1,20 @@
-from rest_framework import viewsets, mixins, status, permissions
-from rest_framework.views import APIView
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
 from django.core.mail import send_mail
-from django.contrib.auth import authenticate
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from reviews.models import Category, Genre, Title
 
-from .serializers import GetConfirmationCodeSerializer, GetTokenSerializer, UserSerializer
-from .permissions import AdminUserModelPermission
-
+from .permissions import AdminUserModelPermission, IsAdminOrSuperUserOrReadOnly
+from .serializers import (
+    CategorySerializer,
+    GenreSerializer,
+    GetConfirmationCodeSerializer,
+    GetTokenSerializer,
+    TitleSerializer, UserSerializer
+)
 
 User = get_user_model()
 
@@ -66,3 +72,25 @@ class UserViewSet(viewsets.ModelViewSet):
         return super().get_object()
 
 
+class CategoriesViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (permissions.AllowAny, IsAdminOrSuperUserOrReadOnly)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
+
+
+class GenresViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (permissions.AllowAny, IsAdminOrSuperUserOrReadOnly)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
+
+
+class TitlesViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (permissions.AllowAny, IsAdminOrSuperUserOrReadOnly)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')

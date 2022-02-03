@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class YamdbConfig(AppConfig):
+class PostsConfig(AppConfig):
     name = 'reviews'
