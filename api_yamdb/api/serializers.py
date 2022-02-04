@@ -9,22 +9,28 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         exclude = ('id',)
-        extra_kwargs = {'name': {'required': False}}
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         exclude = ('id',)
-        extra_kwargs = {'name': {'required': False}}
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True)
-    category = CategorySerializer()
-    # genre = serializers.MultipleChoiceField(choices=Genre.objects.all().values_list('id', 'slug'))
-    # category = serializers.ChoiceField(
-    #     choices=Category.objects.all().values_list('id', 'slug'))
+class TitleGetSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        many=True,
+        queryset=Genre.objects.all())
+    category = serializers.SlugRelatedField(queryset=Category.objects.all())
 
     class Meta:
         model = Title
