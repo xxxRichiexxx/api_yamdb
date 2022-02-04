@@ -27,10 +27,12 @@ class GetConfirmationCodeSerializer(serializers.ModelSerializer):
         fields = ['username', 'email']
 
     def validate(self, data):
-        if User.objects.filter(~Q(email=data['email']), username=data['username']).exists():
+        if (User.objects.filter(~Q(email=data['email']),
+                                username=data['username']).exists()):
             raise serializers.ValidationError(
                 'Пользователь с таким username уже существует!')
-        elif User.objects.filter(~Q(username=data['username']), email=data['email']).exists():
+        elif (User.objects.filter(~Q(username=data['username']),
+                                  email=data['email']).exists()):
             raise serializers.ValidationError(
                 'Пользователь с таким email уже существует!')
         return data
@@ -55,7 +57,14 @@ class GetTokenSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
 
 
 class CategorySerializer(serializers.ModelSerializer):
