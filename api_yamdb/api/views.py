@@ -69,6 +69,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_url_kwarg = 'username'
     lookup_field = 'username'
     permission_classes = (AdminUserModelPermission,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_object(self):
         if self.kwargs['username'] == 'me':
@@ -76,6 +77,11 @@ class UserViewSet(viewsets.ModelViewSet):
             self.check_object_permissions(self.request, obj)
             return obj
         return super().get_object()
+
+    def destroy(self, request, *args, **kwargs):
+        if self.kwargs['username'] == 'me':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().destroy(request, *args, **kwargs)
 
 
 class CategoriesViewSet(
