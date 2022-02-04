@@ -2,7 +2,7 @@ import datetime as dt
 
 from rest_framework import serializers
 from django.db.models import Q
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
 from reviews.validators import validate_user
@@ -70,12 +70,23 @@ class GenreSerializer(serializers.ModelSerializer):
         exclude = ('id',)
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True)
-    category = CategorySerializer()
-    genre = serializers.MultipleChoiceField(choices=Genre.objects.all().values_list('id', 'slug'))
-    category = serializers.ChoiceField(
-        choices=Category.objects.all().values_list('id', 'slug'))
+class TitleGetSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=True,
+        queryset=Genre.objects.all())
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all())
 
     class Meta:
         model = Title
