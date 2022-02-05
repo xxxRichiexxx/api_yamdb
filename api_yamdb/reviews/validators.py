@@ -11,5 +11,6 @@ def validate_user(value):
         )
     elif re.findall(r'[^\w.@+-]+', value):
         raise ValidationError(
-            'Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'
+            'Required. 150 characters or fewer.'
+            'Letters, digits and @/./+/-/_ only.'
         )
