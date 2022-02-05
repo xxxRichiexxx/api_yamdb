@@ -152,11 +152,11 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         author = self.context['request'].user
-        title_id = self.context.get('title_id')
+        title_id = self.context['view'].kwargs.get('title_id')
         if (Review.objects.filter(author=author, title=title_id).exists()
                 and self.context['request'].method != 'PATCH'):
             raise serializers.ValidationError('Вы уже оставили отзыв')
-        return
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
