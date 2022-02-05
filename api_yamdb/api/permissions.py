@@ -7,7 +7,9 @@ class AdminUserModelPermission(permissions.BasePermission):
         return (request.user.is_authenticated
                 and (request.user.is_superuser
                      or request.user.role == 'admin'
-                     or view.action in ('retrieve', 'partial_update', 'destroy')
+                     or view.action in ('retrieve',
+                                        'partial_update',
+                                        'destroy')
                      )
                 )
 
