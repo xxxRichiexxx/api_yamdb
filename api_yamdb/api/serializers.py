@@ -8,7 +8,10 @@ from django.shortcuts import get_object_or_404
 from reviews.validators import validate_user
 from reviews.models import (Category,
                             Genre,
-                            Title)
+                            Title,
+                            Comment,
+                            Review,
+                            )
 
 User = get_user_model()
 
@@ -136,3 +139,32 @@ class TitlePostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Год выпуска превышает текущий!')
         return value
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True)
+    title = serializers.SlugRelatedField(slug_field='pk', read_only=True)
+
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
+        model = Review
+
+    def validate(self, data):
+        author = self.context['request'].user
+        title_id = self.context.get('title_id')
+        if (Review.objects.filter(author=author, title=title_id).exists()
+                and self.context['request'].method != 'PATCH'):
+            raise serializers.ValidationError('Вы уже оставили отзыв')
+        return
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True)
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'pub_date')
+        model = Comment
+
+
