@@ -140,6 +140,7 @@ class TitlePostSerializer(serializers.ModelSerializer):
                 'Год выпуска превышает текущий!')
         return value
 
+
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
                                           read_only=True)
