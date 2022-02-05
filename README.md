@@ -35,7 +35,7 @@ api_yamdb
 
 # Проектирование
 ### ER-диаграмма
-![ER-диаграмма](https://github.com/xxxRichiexxx/api_yamdb/blob/master/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F/%D0%9F%D0%BB%D0%B0%D0%BD.PNG)
+![ER-диаграмма](https://github.com/xxxRichiexxx/api_yamdb/blob/master/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F/ER-%D0%B4%D0%B8%D0%B0%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0.PNG)
 
 ### API
 - Ресурс auth: аутентификация.
@@ -47,4 +47,4 @@ api_yamdb
 - Ресурс comments: комментарии к отзывам. Комментарий привязан к определённому отзыву.
 
 ### План
-![График](Документация/план.png)
+![График](https://github.com/xxxRichiexxx/api_yamdb/blob/master/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F/%D0%9F%D0%BB%D0%B0%D0%BD.PNG)
