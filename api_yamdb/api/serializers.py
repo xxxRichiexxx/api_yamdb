@@ -14,6 +14,9 @@ User = get_user_model()
 
 
 class GetConfirmationCodeSerializer(serializers.ModelSerializer):
+    """
+    Проверяет username и email перед выдачей confirmation_code
+    """
     username = serializers.CharField(
         max_length=150,
         validators=[validate_user]
@@ -46,6 +49,9 @@ class GetConfirmationCodeSerializer(serializers.ModelSerializer):
 
 
 class GetTokenSerializer(serializers.Serializer):
+    """
+    Проверяет username и confirmation_code перед выдачей токена
+    """
     username = serializers.CharField()
     confirmation_code = serializers.CharField(source='password')
 
@@ -55,6 +61,9 @@ class GetTokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Сериализует/десериализует данные модели User.
+    """
     class Meta:
         model = User
         fields = (
@@ -67,6 +76,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def validate_role(self, value):
+        """Запрещаем поьзователю менять свою роль на admin"""
         user = self.context['request'].user
         if user.role == 'user' and value == 'admin':
             value = 'user'
@@ -74,18 +84,27 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """
+    Сериализует/десериализует данные модели Category.
+    """
     class Meta:
         model = Category
         exclude = ('id',)
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """
+    Сериализует/десериализует данные модели Genre.
+    """
     class Meta:
         model = Genre
         exclude = ('id',)
 
 
 class TitleGetSerializer(serializers.ModelSerializer):
+    """
+    Сериализует данные модели Title.
+    """
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
@@ -95,6 +114,9 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
+    """
+    Десериализует данные для модели Title.
+    """
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,
@@ -109,6 +131,7 @@ class TitlePostSerializer(serializers.ModelSerializer):
         extra_kwargs = {'description': {'required': False}}
 
     def validate_year(self, value):
+        """Год выпуска произведения не может быть больше текущего."""
         if value > dt.datetime.now().year:
             raise serializers.ValidationError(
                 'Год выпуска превышает текущий!')

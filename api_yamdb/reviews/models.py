@@ -11,33 +11,37 @@ ROLE_CHOICES = (
 
 
 class CustomUser(AbstractUser):
+    """Кастомная модель пользователей."""
     username = models.CharField(
         max_length=150,
-        verbose_name='Логин',
         unique=True,
-        validators=[validate_user]
+        validators=[validate_user],
+        verbose_name='Логин',
     )
     email = models.EmailField(
         unique=True,
         max_length=254,
+        verbose_name='Почта',
     )
     bio = models.CharField(
         max_length=300,
-        verbose_name='Биография',
         blank=True,
+        verbose_name='Биография',
     )
     role = models.CharField(
         max_length=30,
-        verbose_name='Роль',
         choices=ROLE_CHOICES,
         blank=True,
-        default='user'
+        default='user',
+        verbose_name='Роль',
     )
 
-# extra_kwargs = {'email': {'required': True}}
+    class Meta(AbstractUser.Meta):
+        ordering = ('username',)
 
 
 class Category(models.Model):
+    """Модель категорий."""
     name = models.CharField(max_length=256, verbose_name='Название')
     slug = models.SlugField(
         max_length=50,
@@ -54,6 +58,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель жанров."""
     name = models.CharField(max_length=256, verbose_name='Название')
     slug = models.SlugField(
         max_length=50,
@@ -70,6 +75,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель произведений."""
     name = models.TextField(verbose_name='Название')
     year = models.IntegerField(verbose_name='Год выпуска')
     description = models.TextField(blank=True, verbose_name='Описание')
@@ -101,6 +107,7 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """Модель для связи произведений и жанров отношением многие ко многим."""
     genre = models.ForeignKey(
         Genre,
         on_delete=models.SET_NULL,

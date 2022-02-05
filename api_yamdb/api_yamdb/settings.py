@@ -91,7 +91,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "ru"
 
 TIME_ZONE = 'UTC'
 
@@ -131,3 +131,10 @@ SIMPLE_JWT = {
    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
    'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# загружаем константы из файла .env в окружение
+import os
+from dotenv import load_dotenv
+load_dotenv()
+# загружаем константы из окружения
+FROM_EMAIL = os.getenv("FROM_EMAIL")

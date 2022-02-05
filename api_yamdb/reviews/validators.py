@@ -3,6 +3,7 @@ import re
 
 
 def validate_user(value):
+    """Проверка поля username модели user."""
     if value == 'me':
         raise ValidationError(
             f'Использовать имя {value} в качестве username запрещено.'

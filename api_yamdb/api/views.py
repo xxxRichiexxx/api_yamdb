@@ -19,26 +19,30 @@ from .serializers import (
     TitlePostSerializer,
     UserSerializer
 )
+from django.conf import settings
 
 User = get_user_model()
 
 
 class GetConfirmationCodeView(APIView):
-
+    """
+    При получении POST-запроса с параметрами email и username
+    отправляет письмо с кодом подтверждения (confirmation_code)
+    на указанный адрес email.
+    """
     http_method_names = ['post', ]
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         serializer = GetConfirmationCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
+        to_email = serializer.validated_data['email']
         password = User.objects.make_random_password()
-        # отправка письма
         send_mail(
-            'Subject here',
-            f'Here is the confirmation_code: {password}',
-            'andrey@mail.ru',
-            [email],
+            'You have registered with the Reviews service',
+            f'This is the confirmation code: {password}',
+            settings.FROM_EMAIL,
+            [to_email],
             fail_silently=False,
         )
         serializer.save(password=password)
@@ -46,6 +50,10 @@ class GetConfirmationCodeView(APIView):
 
 
 class GetTokenApiView(APIView):
+    """
+    При получении POST-запроса с параметрами username и confirmation_code
+    возвращает JWT-токен.
+    """
     http_method_names = ['post', ]
     permission_classes = (permissions.AllowAny,)
 
@@ -64,12 +72,22 @@ class GetTokenApiView(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+    Реализует основные операции с моделью пользователей:
+    - получения списка пользователей
+    - создание пользователя
+    - получение детализации по пользователю
+    - редактирование поьзователя
+    - удаление пользователя.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_url_kwarg = 'username'
     lookup_field = 'username'
     permission_classes = (AdminUserModelPermission,)
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_fields = ('role', 'is_superuser', )
+    search_fields = ('username', 'email', 'role', 'bio', )
 
     def get_object(self):
         if self.kwargs['username'] == 'me':
@@ -90,6 +108,12 @@ class CategoriesViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """
+    Реализует основные операции с моделью категорий:
+    - получения списка категорий
+    - создание категории
+    - удаление категории.
+    """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrSuperUserOrReadOnly,)
@@ -105,6 +129,12 @@ class GenresViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """
+    Реализует основные операции с моделью жанров:
+    - получения списка жанров
+    - создание жанра
+    - удаление жанра.
+    """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrSuperUserOrReadOnly,)
@@ -115,10 +145,17 @@ class GenresViewSet(
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    serializer_class = TitleGetSerializer
+    """
+    Реализует основные операции с моделью произведений:
+    - возвращает список всех произведений
+    - добавление нового произведения
+    - возвращает информацию о произведении
+    - обновляет информацию о произведении
+    - удаляет произведение
+    """
     permission_classes = (IsAdminOrSuperUserOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('year',)
+    filterset_fields = ('year', )
 
     def get_queryset(self):
         queryset = Title.objects.all()
