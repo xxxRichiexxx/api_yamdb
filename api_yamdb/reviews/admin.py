@@ -37,11 +37,12 @@ class GenreTitleAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('author', 'score', )
+    search_fields = ('text', )
+    list_filter = ('author', 'score', )
 
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    pass
-
-
+    list_display = ('author', )
+    list_filter = ('author', )

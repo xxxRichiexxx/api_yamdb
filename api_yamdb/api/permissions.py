@@ -45,4 +45,3 @@ class ReviewAndCommentsPermission(permissions.BasePermission):
                 request.user.role == 'moderator' or
                 request.user.role == 'admin' or
                 request.user.is_superuser)
-
