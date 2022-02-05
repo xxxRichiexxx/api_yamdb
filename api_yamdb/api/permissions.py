@@ -12,9 +12,9 @@ class AdminUserModelPermission(permissions.BasePermission):
                 )
 
     def has_object_permission(self, request, view, obj):
-        return ((request.user == obj and view.action != 'destroy') or
-                 request.user.is_superuser or
-                 request.user.role == 'admin')
+        return (view.kwargs['username'] == 'me' or
+                request.user.is_superuser or
+                request.user.role == 'admin')
 
 
 class IsAdminOrSuperUserOrReadOnly(permissions.BasePermission):
