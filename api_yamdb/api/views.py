@@ -6,12 +6,18 @@ from rest_framework import filters, permissions, status, viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import (Category,
-                            Genre,
-                            Title,
-                            Review)
 
-from .permissions import AdminUserModelPermission, IsAdminOrSuperUserOrReadOnly, ReviewAndCommentsPermission
+from reviews.models import (
+    Category,
+    Genre,
+    Title,
+    Review
+)
+from .permissions import (
+    AdminUserModelPermission,
+    IsAdminOrSuperUserOrReadOnly,
+    ReviewAndCommentsPermission
+)
 from .serializers import (
     CategorySerializer,
     GenreSerializer,

@@ -178,8 +178,10 @@ class CommentSerializer(serializers.ModelSerializer):
     """
     Сериализует/десериализует данные модели Comment.
     """
-    author = serializers.SlugRelatedField(slug_field='username',
-                                          read_only=True)
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
 
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')

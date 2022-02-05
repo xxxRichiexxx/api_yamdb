@@ -132,9 +132,9 @@ REST_FRAMEWORK = {
         'api.throttling.SustainedRateAnonThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'burst_user': '200/second',
+        'burst_user': '25/second',
         'sustained_user': '3600/hour',
-        'burst_anon': '150/second',
+        'burst_anon': '20/second',
         'sustained_anon': '1800/hour',
     }
 }

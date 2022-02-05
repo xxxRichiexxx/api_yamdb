@@ -101,9 +101,6 @@ class Title(models.Model):
         return (
             f'name: {self.name}, '
             f'year: {self.year}, '
-            f'description: {self.description}, '
-            f'genre: {self.genre}, '
-            f'category: {self.category}'
         )
 
 
@@ -117,7 +114,7 @@ class GenreTitle(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.genre} {self.title}'
+        return f'{self.genre}  ---  {self.title}'
 
 
 class Review(models.Model):
@@ -158,7 +155,7 @@ class Review(models.Model):
         default_related_name = 'reviews'
 
     def __str__(self):
-        return self.text[:10]
+        return self.text[:60]
 
 
 class Comment(models.Model):
