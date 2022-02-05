@@ -124,6 +124,18 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'api.throttling.BurstRateUserThrottle',
+        'api.throttling.SustainedRateUserThrottle',
+        'api.throttling.BurstRateAnonThrottle',
+        'api.throttling.SustainedRateAnonThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'burst_user': '20/second',
+        'sustained_user': '3600/hour',
+        'burst_anon': '15/second',
+        'sustained_anon': '1800/hour',
+    }
 }
 
 SIMPLE_JWT = {
