@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django_filters',
     'api',
     'reviews',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -109,7 +110,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
-AUTH_USER_MODEL = 'reviews.CustomUser'
+AUTH_USER_MODEL = 'users.CustomUser'
 
 # подключаем движок filebased.EmailBackend
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

@@ -3,9 +3,8 @@ import datetime as dt
 from rest_framework import serializers
 from django.db.models import Q, Avg
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 
-from reviews.validators import validate_user
+from users.validators import validate_user
 from reviews.models import (Category,
                             Genre,
                             Title,
@@ -44,10 +43,7 @@ class GetConfirmationCodeSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
         user, created = User.objects.get_or_create(**validated_data)
-        user.set_password(password)
-        user.save()
         return user
 
 
@@ -56,11 +52,7 @@ class GetTokenSerializer(serializers.Serializer):
     Проверяет username и confirmation_code перед выдачей токена
     """
     username = serializers.CharField()
-    confirmation_code = serializers.CharField(source='password')
-
-    def validate_username(self, value):
-        get_object_or_404(User, username=value)
-        return value
+    confirmation_code = serializers.CharField()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -153,7 +145,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
-        default=serializers.CurrentUserDefault(),
     )
     title = serializers.SlugRelatedField(
         slug_field='pk',
@@ -168,8 +159,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         """Можно оставить только один отзыв."""
         author = self.context['request'].user
         title_id = self.context['view'].kwargs.get('title_id')
-        if (Review.objects.filter(author=author, title=title_id).exists()
-                and self.context['request'].method != 'PATCH'):
+        if (self.context['request'].method != 'PATCH'
+                and Review.objects.filter(author=author, title=title_id).exists()):
             raise serializers.ValidationError('Вы уже оставили отзыв')
         return data
 

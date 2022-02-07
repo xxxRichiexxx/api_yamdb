@@ -1,44 +1,6 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-
-from .validators import validate_user
-
-ROLE_CHOICES = (
-    ('user', 'Аутентифицированный пользователь'),
-    ('moderator', 'Модератор'),
-    ('admin', 'Администратор'),
-)
-
-
-class CustomUser(AbstractUser):
-    """Кастомная модель пользователей."""
-    username = models.CharField(
-        max_length=150,
-        unique=True,
-        validators=[validate_user],
-        verbose_name='Логин',
-    )
-    email = models.EmailField(
-        unique=True,
-        max_length=254,
-        verbose_name='Почта',
-    )
-    bio = models.CharField(
-        max_length=300,
-        blank=True,
-        verbose_name='Биография',
-    )
-    role = models.CharField(
-        max_length=30,
-        choices=ROLE_CHOICES,
-        blank=True,
-        default='user',
-        verbose_name='Роль',
-    )
-
-    class Meta(AbstractUser.Meta):
-        ordering = ('username',)
+from users.models import CustomUser
 
 
 class Category(models.Model):
@@ -119,7 +81,7 @@ class GenreTitle(models.Model):
 
 class Review(models.Model):
     title = models.ForeignKey(
-        'Title',
+        Title,
         on_delete=models.CASCADE,
         verbose_name='Произведение'
     )
@@ -127,7 +89,7 @@ class Review(models.Model):
         verbose_name='текст',
     )
     author = models.ForeignKey(
-        'CustomUser',
+        CustomUser,
         on_delete=models.CASCADE,
         verbose_name='Автор'
     )
@@ -160,13 +122,15 @@ class Review(models.Model):
 
 class Comment(models.Model):
     review = models.ForeignKey(
-        'Review', on_delete=models.CASCADE,
+        Review,
+        on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Отзыв',
     )
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
-        'CustomUser', on_delete=models.CASCADE,
+        CustomUser,
+        on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Автор'
     )

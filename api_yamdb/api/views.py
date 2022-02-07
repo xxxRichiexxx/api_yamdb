@@ -1,4 +1,5 @@
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
@@ -14,9 +15,10 @@ from reviews.models import (
     Review
 )
 from .permissions import (
-    AdminUserModelPermission,
-    IsAdminOrSuperUserOrReadOnly,
-    ReviewAndCommentsPermission
+    AdminPermission,
+    ForMePermission,
+    ReadOnlyPermission,
+    CreateAndUpdatePermission,
 )
 from .serializers import (
     CategorySerializer,
@@ -30,6 +32,7 @@ from .serializers import (
     UserSerializer
 )
 from django.conf import settings
+from .my_filters import TitlesFilter
 
 User = get_user_model()
 
@@ -46,16 +49,16 @@ class GetConfirmationCodeView(APIView):
     def post(self, request):
         serializer = GetConfirmationCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user = serializer.save()
         to_email = serializer.validated_data['email']
-        password = User.objects.make_random_password()
+        confirmation_code = default_token_generator.make_token(user)
         send_mail(
             'You have registered with the Reviews service',
-            f'This is the confirmation code: {password}',
+            f'This is the confirmation code: {confirmation_code}',
             settings.FROM_EMAIL,
             [to_email],
             fail_silently=False,
         )
-        serializer.save(password=password)
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
@@ -69,15 +72,15 @@ class GetTokenApiView(APIView):
 
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         username = serializer.validated_data.get('username')
-        password = serializer.validated_data.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
+        user = get_object_or_404(User, username=username)
+        confirmation_code = serializer.validated_data.get('confirmation_code')
+        if default_token_generator.check_token(user, confirmation_code):
             access_token = RefreshToken.for_user(user).access_token
             data = {"token": str(access_token)}
             return Response(data, status=status.HTTP_201_CREATED)
-        errors = {"error": "password is incorrect"}
+        errors = {"error": "confirmation code is incorrect"}
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -94,7 +97,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     lookup_url_kwarg = 'username'
     lookup_field = 'username'
-    permission_classes = (AdminUserModelPermission,)
+    permission_classes = (AdminPermission | ForMePermission,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('role', 'is_superuser', )
     search_fields = ('username', 'email', 'role', 'bio', )
@@ -126,7 +129,7 @@ class CategoriesViewSet(
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrSuperUserOrReadOnly,)
+    permission_classes = (AdminPermission | ReadOnlyPermission,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -147,7 +150,7 @@ class GenresViewSet(
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrSuperUserOrReadOnly,)
+    permission_classes = (AdminPermission | ReadOnlyPermission,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -163,22 +166,10 @@ class TitlesViewSet(viewsets.ModelViewSet):
     - обновляет информацию о произведении
     - удаляет произведение
     """
-    permission_classes = (IsAdminOrSuperUserOrReadOnly,)
+    queryset = Title.objects.all()
+    permission_classes = (AdminPermission | ReadOnlyPermission,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('year', )
-
-    def get_queryset(self):
-        queryset = Title.objects.all()
-        genre = self.request.query_params.get('genre')
-        category = self.request.query_params.get('category')
-        name = self.request.query_params.get('name')
-        if genre is not None:
-            queryset = queryset.filter(genre__slug=genre)
-        if category is not None:
-            queryset = queryset.filter(category__slug=category)
-        if name is not None:
-            queryset = queryset.filter(name__contains=name)
-        return queryset
+    filterset_class = TitlesFilter
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'partial_update':
@@ -188,7 +179,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (ReviewAndCommentsPermission, )
+    permission_classes = (AdminPermission | ReadOnlyPermission | CreateAndUpdatePermission,)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -203,7 +194,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (ReviewAndCommentsPermission, )
+    permission_classes = (AdminPermission | ReadOnlyPermission | CreateAndUpdatePermission,)
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')

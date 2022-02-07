@@ -1,19 +1,13 @@
 from django.contrib import admin
 
-from .models import (CustomUser,
-                     Category,
-                     Genre,
-                     Title,
-                     GenreTitle,
-                     Review,
-                     Comment)
-
-
-@admin.register(CustomUser)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'role')
-    search_fields = ('username', 'email', 'role', 'bio')
-    list_filter = ('role', 'is_superuser')
+from .models import (
+    Category,
+    Genre,
+    Title,
+    GenreTitle,
+    Review,
+    Comment
+)
 
 
 @admin.register(Category)
