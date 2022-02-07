@@ -6,6 +6,7 @@ from rest_framework import filters, permissions, status, viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from api.filters import TitleFilter
 
 from reviews.models import (
     Category,
@@ -163,22 +164,10 @@ class TitlesViewSet(viewsets.ModelViewSet):
     - обновляет информацию о произведении
     - удаляет произведение
     """
+    queryset = Title.objects.all()
     permission_classes = (IsAdminOrSuperUserOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('year', )
-
-    def get_queryset(self):
-        queryset = Title.objects.all()
-        genre = self.request.query_params.get('genre')
-        category = self.request.query_params.get('category')
-        name = self.request.query_params.get('name')
-        if genre is not None:
-            queryset = queryset.filter(genre__slug=genre)
-        if category is not None:
-            queryset = queryset.filter(category__slug=category)
-        if name is not None:
-            queryset = queryset.filter(name__contains=name)
-        return queryset
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'partial_update':
