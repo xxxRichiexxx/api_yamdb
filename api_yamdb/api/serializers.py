@@ -160,7 +160,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         author = self.context['request'].user
         title_id = self.context['view'].kwargs.get('title_id')
         if (self.context['request'].method != 'PATCH'
-                and Review.objects.filter(author=author, title=title_id).exists()):
+                and Review.objects.filter(
+                    author=author, title=title_id).exists()):
             raise serializers.ValidationError('Вы уже оставили отзыв')
         return data
 
