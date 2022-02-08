@@ -36,6 +36,10 @@ class CustomUser(AbstractUser):
         verbose_name='Роль',
     )
 
+
+    class Meta(AbstractUser.Meta):
+        ordering = ('username',)
+
     @property
     def is_admin(self):
         return self.is_superuser or self.role == 'admin'
@@ -43,6 +47,3 @@ class CustomUser(AbstractUser):
     @property
     def is_moderator(self):
         return self.role == 'moderator'
-
-    class Meta(AbstractUser.Meta):
-        ordering = ('username',)
