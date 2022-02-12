@@ -19,13 +19,6 @@ class GetConfirmationCodeSerializer(serializers.ModelSerializer):
     """
     Проверяет username и email перед выдачей confirmation_code
     """
-    username = serializers.CharField(
-        max_length=150,
-        validators=[validate_user]
-    )
-    email = serializers.EmailField(
-        max_length=254,
-    )
 
     class Meta:
         model = User
